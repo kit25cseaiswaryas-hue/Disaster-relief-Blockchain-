@@ -1,1 +1,439 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disaster Relief Platform</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .status-pending { 
+      background: linear-gradient(135deg, #FEF3C7 0%, #FCD34D 100%);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    .status-verified { 
+      background: linear-gradient(135deg, #D1FAE5 0%, #34D399 100%);
+    }
+    
+    .status-distributed { 
+      background: linear-gradient(135deg, #DBEAFE 0%, #60A5FA 100%);
+    }
+    
+    .blockchain-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .stat-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto" style="background: linear-gradient(135deg, #0F766E 0%, #0E7490 50%, #1E40AF 100%);">
+   <div class="min-h-full"><!-- Header -->
+    <header class="py-8 px-6" style="background: rgba(0,0,0,0.2);">
+     <div class="max-w-7xl mx-auto">
+      <div class="flex items-center justify-between">
+       <div>
+        <h1 id="platform-title" class="text-4xl font-bold mb-2" style="color: #FFFFFF;">Global Relief Chain</h1>
+        <p id="platform-tagline" class="text-lg" style="color: #D1FAE5;">Transparent Aid Distribution Powered by Trust</p>
+       </div>
+       <div class="blockchain-card px-6 py-4 rounded-xl">
+        <div class="text-sm font-semibold mb-1" style="color: #A7F3D0;">
+         NETWORK STATUS
+        </div>
+        <div class="flex items-center gap-2">
+         <div class="w-3 h-3 rounded-full" style="background: #34D399; box-shadow: 0 0 12px #34D399;"></div><span class="font-bold" style="color: #FFFFFF;">ACTIVE</span>
+        </div>
+       </div>
+      </div>
+     </div>
+    </header><!-- Statistics Dashboard -->
+    <section class="py-8 px-6">
+     <div class="max-w-7xl mx-auto">
+      <h2 id="stats-title" class="text-2xl font-bold mb-6" style="color: #FFFFFF;">Platform Statistics</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+       <div class="stat-card blockchain-card p-6 rounded-xl">
+        <div class="text-sm font-semibold mb-2" style="color: #A7F3D0;">
+         Total Distributed
+        </div>
+        <div id="total-amount" class="text-3xl font-bold mb-1" style="color: #FFFFFF;">
+         $0
+        </div>
+        <div class="text-xs" style="color: #D1FAE5;">
+         Verified Transactions
+        </div>
+       </div>
+       <div class="stat-card blockchain-card p-6 rounded-xl">
+        <div class="text-sm font-semibold mb-2" style="color: #A7F3D0;">
+         Beneficiaries
+        </div>
+        <div id="total-beneficiaries" class="text-3xl font-bold mb-1" style="color: #FFFFFF;">
+         0
+        </div>
+        <div class="text-xs" style="color: #D1FAE5;">
+         Verified Recipients
+        </div>
+       </div>
+       <div class="stat-card blockchain-card p-6 rounded-xl">
+        <div class="text-sm font-semibold mb-2" style="color: #A7F3D0;">
+         Pending
+        </div>
+        <div id="pending-count" class="text-3xl font-bold mb-1" style="color: #FFFFFF;">
+         0
+        </div>
+        <div class="text-xs" style="color: #D1FAE5;">
+         Awaiting Verification
+        </div>
+       </div>
+       <div class="stat-card blockchain-card p-6 rounded-xl">
+        <div class="text-sm font-semibold mb-2" style="color: #A7F3D0;">
+         Success Rate
+        </div>
+        <div id="success-rate" class="text-3xl font-bold mb-1" style="color: #FFFFFF;">
+         100%
+        </div>
+        <div class="text-xs" style="color: #D1FAE5;">
+         Distribution Accuracy
+        </div>
+       </div>
+      </div>
+     </div>
+    </section><!-- Distribution Form -->
+    <section class="py-8 px-6">
+     <div class="max-w-7xl mx-auto">
+      <div class="blockchain-card p-8 rounded-xl">
+       <h2 id="form-title" class="text-2xl font-bold mb-6" style="color: #FFFFFF;">New Distribution Request</h2>
+       <form id="distribution-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div><label for="beneficiary-name" class="block text-sm font-semibold mb-2" style="color: #D1FAE5;">Beneficiary Name</label> <input type="text" id="beneficiary-name" required class="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-teal-400" style="background: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.3); color: #1F2937;">
+        </div>
+        <div><label for="location" class="block text-sm font-semibold mb-2" style="color: #D1FAE5;">Location</label> <input type="text" id="location" required class="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-teal-400" style="background: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.3); color: #1F2937;">
+        </div>
+        <div><label for="disaster-type" class="block text-sm font-semibold mb-2" style="color: #D1FAE5;">Disaster Type</label> <select id="disaster-type" required class="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-teal-400" style="background: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.3); color: #1F2937;"> <option value="">Select disaster type</option> <option value="Earthquake">Earthquake</option> <option value="Flood">Flood</option> <option value="Hurricane">Hurricane</option> <option value="Wildfire">Wildfire</option> <option value="Drought">Drought</option> <option value="Tsunami">Tsunami</option> </select>
+        </div>
+        <div><label for="amount" class="block text-sm font-semibold mb-2" style="color: #D1FAE5;">Amount (USD)</label> <input type="number" id="amount" required min="1" step="0.01" class="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-teal-400" style="background: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.3); color: #1F2937;">
+        </div>
+        <div class="md:col-span-2"><button type="submit" id="submit-btn" class="w-full py-4 rounded-lg font-bold text-lg transition-all duration-300 hover:shadow-lg" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: #FFFFFF;"> Submit Distribution Request </button>
+        </div>
+       </form>
+       <div id="form-message" class="mt-4 p-4 rounded-lg hidden"></div>
+      </div>
+     </div>
+    </section><!-- Distribution Log -->
+    <section class="py-8 px-6 pb-12">
+     <div class="max-w-7xl mx-auto">
+      <h2 id="distribution-title" class="text-2xl font-bold mb-6" style="color: #FFFFFF;">Distribution Ledger</h2>
+      <div id="distribution-list" class="space-y-4">
+       <div class="blockchain-card p-6 rounded-xl text-center" style="color: #D1FAE5;">
+        <p>No distributions recorded yet. Submit your first request above.</p>
+       </div>
+      </div>
+     </div>
+    </section>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      platform_title: "Global Relief Chain",
+      platform_tagline: "Transparent Aid Distribution Powered by Trust",
+      stats_title: "Platform Statistics",
+      distribution_title: "Distribution Ledger",
+      form_title: "New Distribution Request",
+      background_color: "#0F766E",
+      surface_color: "#FFFFFF",
+      text_color: "#1F2937",
+      primary_action_color: "#10B981",
+      secondary_action_color: "#0E7490",
+      font_family: "system-ui",
+      font_size: 16
+    };
 
+    let distributions = [];
+    let isProcessing = false;
+
+    const dataHandler = {
+      onDataChanged(data) {
+        distributions = data;
+        updateStatistics();
+        renderDistributions();
+      }
+    };
+
+    async function initializeApp() {
+      const initResult = await window.dataSdk.init(dataHandler);
+      if (!initResult.isOk) {
+        showMessage("Failed to initialize platform", "error");
+        return;
+      }
+
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            document.getElementById('platform-title').textContent = config.platform_title || defaultConfig.platform_title;
+            document.getElementById('platform-tagline').textContent = config.platform_tagline || defaultConfig.platform_tagline;
+            document.getElementById('stats-title').textContent = config.stats_title || defaultConfig.stats_title;
+            document.getElementById('distribution-title').textContent = config.distribution_title || defaultConfig.distribution_title;
+            document.getElementById('form-title').textContent = config.form_title || defaultConfig.form_title;
+
+            const baseFont = config.font_size || defaultConfig.font_size;
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseFontStack = 'system-ui, -apple-system, sans-serif';
+            const fontStack = `${customFont}, ${baseFontStack}`;
+
+            document.getElementById('platform-title').style.fontSize = `${baseFont * 2}px`;
+            document.getElementById('platform-title').style.fontFamily = fontStack;
+            document.getElementById('platform-tagline').style.fontSize = `${baseFont * 1.125}px`;
+            document.getElementById('platform-tagline').style.fontFamily = fontStack;
+            document.getElementById('stats-title').style.fontSize = `${baseFont * 1.5}px`;
+            document.getElementById('stats-title').style.fontFamily = fontStack;
+            document.getElementById('distribution-title').style.fontSize = `${baseFont * 1.5}px`;
+            document.getElementById('distribution-title').style.fontFamily = fontStack;
+            document.getElementById('form-title').style.fontSize = `${baseFont * 1.5}px`;
+            document.getElementById('form-title').style.fontFamily = fontStack;
+
+            const bgColor = config.background_color || defaultConfig.background_color;
+            const textColor = config.text_color || defaultConfig.text_color;
+            const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+
+            document.getElementById('app').style.background = `linear-gradient(135deg, ${bgColor} 0%, #0E7490 50%, #1E40AF 100%)`;
+            
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.style.background = `linear-gradient(135deg, ${primaryColor} 0%, #059669 100%)`;
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.background_color || defaultConfig.background_color,
+                set: (value) => {
+                  if (window.elementSdk && window.elementSdk.config) {
+                    window.elementSdk.config.background_color = value;
+                    window.elementSdk.setConfig({ background_color: value });
+                  }
+                }
+              },
+              {
+                get: () => config.text_color || defaultConfig.text_color,
+                set: (value) => {
+                  if (window.elementSdk && window.elementSdk.config) {
+                    window.elementSdk.config.text_color = value;
+                    window.elementSdk.setConfig({ text_color: value });
+                  }
+                }
+              },
+              {
+                get: () => config.primary_action_color || defaultConfig.primary_action_color,
+                set: (value) => {
+                  if (window.elementSdk && window.elementSdk.config) {
+                    window.elementSdk.config.primary_action_color = value;
+                    window.elementSdk.setConfig({ primary_action_color: value });
+                  }
+                }
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => config.font_family || defaultConfig.font_family,
+              set: (value) => {
+                if (window.elementSdk && window.elementSdk.config) {
+                  window.elementSdk.config.font_family = value;
+                  window.elementSdk.setConfig({ font_family: value });
+                }
+              }
+            },
+            fontSizeable: {
+              get: () => config.font_size || defaultConfig.font_size,
+              set: (value) => {
+                if (window.elementSdk && window.elementSdk.config) {
+                  window.elementSdk.config.font_size = value;
+                  window.elementSdk.setConfig({ font_size: value });
+                }
+              }
+            }
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["platform_title", config.platform_title || defaultConfig.platform_title],
+            ["platform_tagline", config.platform_tagline || defaultConfig.platform_tagline],
+            ["stats_title", config.stats_title || defaultConfig.stats_title],
+            ["distribution_title", config.distribution_title || defaultConfig.distribution_title],
+            ["form_title", config.form_title || defaultConfig.form_title]
+          ])
+        });
+      }
+
+      setupForm();
+    }
+
+    function setupForm() {
+      const form = document.getElementById('distribution-form');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (isProcessing) return;
+
+        if (distributions.length >= 999) {
+          showMessage("Maximum limit of 999 distributions reached. Platform capacity full.", "error");
+          return;
+        }
+
+        isProcessing = true;
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing Request...';
+
+        const formData = {
+          id: Date.now().toString(),
+          beneficiary_name: document.getElementById('beneficiary-name').value.trim(),
+          location: document.getElementById('location').value.trim(),
+          disaster_type: document.getElementById('disaster-type').value,
+          amount: parseFloat(document.getElementById('amount').value),
+          status: 'pending',
+          timestamp: new Date().toISOString()
+        };
+
+        const result = await window.dataSdk.create(formData);
+
+        if (result.isOk) {
+          showMessage(`Distribution request submitted for ${formData.beneficiary_name}`, "success");
+          form.reset();
+        } else {
+          showMessage("Failed to submit request. Please try again.", "error");
+        }
+
+        isProcessing = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Distribution Request';
+      });
+    }
+
+    function updateStatistics() {
+      const totalAmount = distributions.reduce((sum, d) => sum + d.amount, 0);
+      const uniqueBeneficiaries = new Set(distributions.map(d => d.beneficiary_name)).size;
+      const pendingCount = distributions.filter(d => d.status === 'pending').length;
+      const completedCount = distributions.filter(d => d.status === 'distributed').length;
+      const successRate = distributions.length > 0 ? Math.round((completedCount / distributions.length) * 100) : 100;
+
+      document.getElementById('total-amount').textContent = `$${totalAmount.toLocaleString()}`;
+      document.getElementById('total-beneficiaries').textContent = uniqueBeneficiaries;
+      document.getElementById('pending-count').textContent = pendingCount;
+      document.getElementById('success-rate').textContent = `${successRate}%`;
+    }
+
+    function renderDistributions() {
+      const container = document.getElementById('distribution-list');
+      
+      if (distributions.length === 0) {
+        container.innerHTML = `
+          <div class="blockchain-card p-6 rounded-xl text-center" style="color: #D1FAE5;">
+            <p>No distributions recorded yet. Submit your first request above.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const existingItems = new Map(
+        [...container.children].map(el => [el.dataset.itemId, el])
+      );
+
+      const sortedDistributions = [...distributions].sort((a, b) => 
+        new Date(b.timestamp) - new Date(a.timestamp)
+      );
+
+      sortedDistributions.forEach(dist => {
+        if (existingItems.has(dist.id)) {
+          updateDistributionElement(existingItems.get(dist.id), dist);
+          existingItems.delete(dist.id);
+        } else {
+          container.appendChild(createDistributionElement(dist));
+        }
+      });
+
+      existingItems.forEach(el => el.remove());
+    }
+
+    function createDistributionElement(dist) {
+      const div = document.createElement('div');
+      div.dataset.itemId = dist.id;
+      updateDistributionElement(div, dist);
+      return div;
+    }
+
+    function updateDistributionElement(element, dist) {
+      const statusClass = `status-${dist.status}`;
+      const statusText = dist.status.charAt(0).toUpperCase() + dist.status.slice(1);
+      const date = new Date(dist.timestamp).toLocaleString();
+
+      element.className = 'blockchain-card p-6 rounded-xl';
+      element.innerHTML = `
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="text-xl font-bold" style="color: #FFFFFF;">${dist.beneficiary_name}</h3>
+              <span class="${statusClass} px-3 py-1 rounded-full text-sm font-semibold" style="color: #1F2937;">${statusText}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm" style="color: #D1FAE5;">
+              <div><strong>Location:</strong> ${dist.location}</div>
+              <div><strong>Disaster:</strong> ${dist.disaster_type}</div>
+              <div><strong>Date:</strong> ${date}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <div class="text-2xl font-bold" style="color: #FFFFFF;">$${dist.amount.toLocaleString()}</div>
+              <div class="text-xs" style="color: #A7F3D0;">Allocation</div>
+            </div>
+            <div class="flex flex-col gap-2">
+              ${dist.status === 'pending' ? `
+                <button onclick="updateStatus('${dist.id}', 'verified')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:shadow-lg" style="background: #34D399; color: #FFFFFF;">
+                  Verify
+                </button>
+              ` : ''}
+              ${dist.status === 'verified' ? `
+                <button onclick="updateStatus('${dist.id}', 'distributed')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:shadow-lg" style="background: #60A5FA; color: #FFFFFF;">
+                  Distribute
+                </button>
+              ` : ''}
+              <button onclick="deleteDistribution('${dist.id}')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:shadow-lg" style="background: #EF4444; color: #FFFFFF;">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    window.updateStatus = async function(id, newStatus) {
+      const dist = distributions.find(d => d.id === id);
+      if (!dist) return;
+
+      dist.status = newStatus;
+      const result = await window.dataSdk.update(dist);
+
+      if (result.isOk) {
+        showMessage(`Status updated to ${newStatus}`, "success");
+      } else {
+        showMessage("Failed to update status", "error");
+      }
+    };
+
+    window.deleteDistribution = async function(id) {
+      const dist = 
